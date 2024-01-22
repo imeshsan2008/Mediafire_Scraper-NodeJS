@@ -5,7 +5,10 @@ const cors = require("cors");
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://kyaw-mel-drive.vercel.app",
+];
 
 const corsOptions = {
   origin: (origin, callback) => {
