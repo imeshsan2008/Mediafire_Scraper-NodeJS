@@ -7,6 +7,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://127.0.0.1:8000",
   "https://kyaw-mel-drive.vercel.app",
 ];
 
