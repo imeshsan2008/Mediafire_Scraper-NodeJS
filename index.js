@@ -1,6 +1,5 @@
 const express = require("express");
-const axios = require("axios");
-const cheerio = require("cheerio");
+const puppeteer = require("puppeteer");
 const cors = require("cors");
 
 const app = express();
@@ -19,7 +18,7 @@ const corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  optionsSuccessStatus: 200,
 };
 
 // Enable CORS with specific options
@@ -28,19 +27,28 @@ app.use(cors(corsOptions));
 app.get("/", async (req, res) => {
   return res.status(200).json({ message: "Hello World" });
 });
+
 app.get("/scrape", async (req, res) => {
   try {
     const targetUrl = req.query.target_url;
 
     if (!targetUrl) return res.status(400).json({ message: "Invalid URL" });
 
-    const response = await axios.get(targetUrl);
+    // Launch Puppeteer
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
 
-    // Load the HTML into Cheerio
-    const $ = cheerio.load(response.data);
+    // Navigate to the target URL
+    await page.goto(targetUrl, { waitUntil: "networkidle2" });
+
+    // Wait for the page to load completely (you can wait for specific elements if needed)
+    await page.waitForSelector("title"); // Example: wait for the title element
 
     // Extract the title of the page
-    const title = $("title").text();
+    const title = await page.title();
+
+    // Close the browser
+    await browser.close();
 
     return res.status(200).json({ message: "success", title });
   } catch (error) {
