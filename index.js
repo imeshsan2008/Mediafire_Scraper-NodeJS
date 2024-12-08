@@ -8,7 +8,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:8000",
-  "https://kyaw-mel-drive.vercel.app",
+  "https://tiktok-video-downloader-api.vercel.app/",
 ];
 
 const corsOptions = {
@@ -28,7 +28,6 @@ app.use(cors(corsOptions));
 app.get("/", async (req, res) => {
   return res.status(200).json({ message: "Hello World" });
 });
-
 app.get("/scrape", async (req, res) => {
   try {
     const targetUrl = req.query.target_url;
@@ -37,14 +36,16 @@ app.get("/scrape", async (req, res) => {
 
     const response = await axios.get(targetUrl);
 
+    // Load the HTML into Cheerio
     const $ = cheerio.load(response.data);
 
-    const link = $(".popsok").attr("href");
+    // Extract the title of the page
+    const title = $("title").text();
 
-    return res.status(200).json({ mesage: "success", link });
+    return res.status(200).json({ message: "success", title });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Error" });
+    console.error(error);
+    return res.status(500).json({ message: "Error fetching the webpage" });
   }
 });
 
