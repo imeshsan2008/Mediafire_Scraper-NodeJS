@@ -1,6 +1,6 @@
 const express = require("express");
-const puppeteer = require("puppeteer");
 const cors = require("cors");
+const chromium = require("chrome-aws-lambda");
 
 const app = express();
 
@@ -21,7 +21,6 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-// Enable CORS with specific options
 app.use(cors(corsOptions));
 
 app.get("/", async (req, res) => {
@@ -34,20 +33,21 @@ app.get("/scrape", async (req, res) => {
 
     if (!targetUrl) return res.status(400).json({ message: "Invalid URL" });
 
-    // Launch Puppeteer
-    const browser = await puppeteer.launch();
+    const browser = await chromium.puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+    });
+
     const page = await browser.newPage();
 
     // Navigate to the target URL
     await page.goto(targetUrl, { waitUntil: "networkidle2" });
 
-    // Wait for the page to load completely (you can wait for specific elements if needed)
-    await page.waitForSelector("title"); // Example: wait for the title element
-
     // Extract the title of the page
     const title = await page.title();
 
-    // Close the browser
     await browser.close();
 
     return res.status(200).json({ message: "success", title });
